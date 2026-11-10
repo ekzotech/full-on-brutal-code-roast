@@ -14,3 +14,13 @@ test('filters the language board and opens a paste after reload', async ({ page,
   await expect(page.getByRole('heading', { name: title })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Редактировать' })).toBeVisible();
 });
+
+test('blocks empty and oversized code', async ({ page }) => {
+  await page.goto('/pastes/new?language=typescript');
+  await page.getByLabel('Заголовок').fill('Validation example');
+  const submit = page.getByRole('button', { name: 'Опубликовать', exact: true });
+  await expect(submit).toBeDisabled();
+  await page.getByLabel('Код', { exact: true }).fill('я'.repeat(25601));
+  await expect(page.getByText('Код превышает лимит.')).toBeVisible();
+  await expect(submit).toBeDisabled();
+});
