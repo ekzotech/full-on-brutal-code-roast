@@ -78,4 +78,33 @@ suite('PostgreSQL API', () => {
     await http().patch(path).set('Authorization', authorization)
       .send({ expectedRevision: 1, code: 'stale code' }).expect(409);
   });
+
+  it('validates line ranges and recalculates scores after comment mutations', async () => {
+    const { id, secret } = await createPaste();
+    const path = '/api/pastes/' + id;
+    const comments = path + '/revisions/1/comments';
+    const payload = { startLine: 1, endLine: 2, body: 'Prefer a better name', rating: 4 };
+    await http().post(comments).send({ ...payload, endLine: 3 }).expect(400);
+    await http().post(comments).send({ ...payload, startLine: 2, endLine: 1 }).expect(400);
+    const { body: comment } = await http().post(comments).send(payload).expect(201);
+    await http().post(comments).send({ ...payload, startLine: 2, rating: 2 }).expect(201);
+    const score = async () => (await http().get(path).expect(200)).body.quality;
+    expect(await score()).toEqual({ average: 3, count: 2 });
+    const commentPath = '/api/comments/' + comment.id;
+    await http().delete(commentPath).expect(403);
+    await http().patch(commentPath).set('Authorization', 'Bearer ' + comment.secret)
+      .send({ body: payload.body, rating: null }).expect(200);
+    expect(await score()).toEqual({ average: 2, count: 1 });
+    await http().delete(commentPath).set('Authorization', 'Bearer ' + comment.secret).expect(204);
+    await http().patch(path).set('Authorization', 'Bearer ' + secret)
+      .send({ expectedRevision: 1, code: 'new code' }).expect(200);
+    expect(await score()).toEqual({ average: null, count: 0 });
+    const old = await http().get(comments).expect(200);
+    expect(old.body.items).toHaveLength(1);
+    expect(old.body.items[0]).not.toHaveProperty('secret');
+    await http().delete(path).expect(403);
+    await http().delete(path).set('Authorization', 'Bearer ' + secret).expect(204);
+    const [count] = await db.query('SELECT count(*)::int AS count FROM comments');
+    expect(count.count).toBe(0);
+  });
 });
