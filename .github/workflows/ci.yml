@@ -1,0 +1,43 @@
+name: CI
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: roast
+          POSTGRES_PASSWORD: roast
+          POSTGRES_DB: roast_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U roast -d roast_test"
+          --health-interval 3s --health-timeout 3s --health-retries 15
+    env:
+      TEST_DATABASE_URL: postgresql://roast:roast@127.0.0.1:5432/roast_test
+      BROWSER_DATABASE_URL: postgresql://roast:roast@127.0.0.1:5432/roast_browser
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+      - run: npm run test -w @roast/api -- --runInBand
+      - run: docker exec ${{ job.services.postgres.id }} createdb -U roast roast_browser
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:browser
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-results
+          path: apps/web/test-results/
