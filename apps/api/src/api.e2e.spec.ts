@@ -65,4 +65,17 @@ suite('PostgreSQL API', () => {
   it('accepts exactly 51,200 bytes even when JSON escaping expands the body', async () => {
     await http().post('/api/pastes').send({ ...input, code: '\u0001'.repeat(51200) }).expect(201);
   });
+
+  it('keeps old revisions and rejects stale editors', async () => {
+    const { id, secret } = await createPaste();
+    const path = '/api/pastes/' + id;
+    const authorization = 'Bearer ' + secret;
+    const updated = await http().patch(path).set('Authorization', authorization)
+      .send({ expectedRevision: 1, code: 'new code' }).expect(200);
+    expect(updated.body.revision).toBe(2);
+    const historical = await http().get(path + '/revisions/1').expect(200);
+    expect(historical.body.code).toBe(input.code);
+    await http().patch(path).set('Authorization', authorization)
+      .send({ expectedRevision: 1, code: 'stale code' }).expect(409);
+  });
 });
