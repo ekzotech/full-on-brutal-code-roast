@@ -13,6 +13,7 @@ services:
 
   api:
     image: roast-api:local
+    pull_policy: never
     environment:
       <<: *api-env
       TRUST_PROXY: "1"
