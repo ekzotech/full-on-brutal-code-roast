@@ -27,4 +27,23 @@ export class PastesController {
       return { id: id as string, secret };
     });
   }
+
+  @Get(':id')
+  async get(@Param('id', ParseUUIDPipe) id: string) {
+    return getPaste(this.db.manager, id);
+  }
+}
+export async function getPaste(db: EntityManager, id: string) {
+  const [paste] = await db.query(`
+    SELECT p.id, p.title, p.created_at AS "createdAt", r.number AS revision, r.code,
+           json_build_object('slug', l.slug, 'name', l.name) AS language
+    FROM pastes p
+    JOIN LATERAL (
+      SELECT number, code FROM revisions WHERE paste_id = p.id ORDER BY number DESC LIMIT 1
+    ) r ON true
+    JOIN languages l ON l.slug = p.language
+    WHERE p.id = $1
+  `, [id]);
+  if (!paste) throw new NotFoundException('Paste not found');
+  return paste;
 }
