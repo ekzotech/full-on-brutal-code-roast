@@ -46,3 +46,20 @@ export class UpdatePaste {
   @Validate(CodeSize)
   code?: string;
 }
+
+export class UpdateComment {
+  @IsString() @Length(1, 2000) @Matches(hasText) @Matches(noNull)
+  body!: string;
+
+  @ValidateIf((_, value) => value !== undefined && value !== null)
+  @IsInt() @Min(1) @Max(5)
+  rating?: number | null;
+}
+
+export class CreateComment extends UpdateComment {
+  @IsInt() @Min(1) @Max(51200)
+  startLine!: number;
+
+  @IsInt() @Min(1) @Max(51200)
+  endLine!: number;
+}
