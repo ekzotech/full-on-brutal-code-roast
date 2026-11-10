@@ -29,3 +29,20 @@ export class CreatePaste {
   @Validate(CodeSize)
   code!: string;
 }
+
+export class UpdatePaste {
+  @IsInt() @Min(1) @Max(2147483647)
+  expectedRevision!: number;
+
+  @ValidateIf((_, value) => value !== undefined)
+  @IsString() @Length(1, 120) @Matches(hasText) @Matches(noNull)
+  title?: string;
+
+  @ValidateIf((_, value) => value !== undefined)
+  @IsString() @Matches(slug)
+  language?: string;
+
+  @ValidateIf((_, value) => value !== undefined)
+  @Validate(CodeSize)
+  code?: string;
+}

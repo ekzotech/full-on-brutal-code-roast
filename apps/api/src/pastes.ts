@@ -1,11 +1,11 @@
 import {
-  Controller, Post, Body, Header, Get, Param, ParseUUIDPipe, Query, NotFoundException,
+  Controller, Post, Body, Header, Get, Param, ParseUUIDPipe, Query, NotFoundException, Patch, Headers, ConflictException,
 } from '@nestjs/common';
 import { DataSource, EntityManager } from 'typeorm';
 import { pageNumber } from './pagination';
-import { CreatePaste } from './dto';
+import { CreatePaste, UpdatePaste } from './dto';
 import { getLanguage } from './languages';
-import { issueSecret } from './secrets';
+import { assertOwner, issueSecret } from './secrets';
 
 @Controller('pastes')
 export class PastesController {
@@ -48,6 +48,33 @@ export class PastesController {
   async get(@Param('id', ParseUUIDPipe) id: string) {
     return getPaste(this.db.manager, id);
   }
+  @Patch(':id')
+  update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Headers('authorization') authorization: string | undefined,
+    @Body() input: UpdatePaste,
+  ) {
+    return this.db.transaction(async db => {
+      const paste = await lockPaste(db, id, authorization);
+      const current = await getPaste(db, id);
+      if (current.revision !== input.expectedRevision) {
+        throw new ConflictException('A newer revision already exists');
+      }
+      const language = input.language ?? paste.language;
+      if (input.language !== undefined) await getLanguage(db, language);
+      await db.query('UPDATE pastes SET title = $2, language = $3 WHERE id = $1', [
+        id, input.title?.trim() ?? paste.title, language,
+      ]);
+      const code = input.code ?? current.code;
+      if (code !== current.code || language !== paste.language) {
+        await db.query(
+          'INSERT INTO revisions (paste_id, number, code, language) VALUES ($1, $2, $3, $4)',
+          [id, current.revision + 1, code, language],
+        );
+      }
+      return getPaste(db, id);
+    });
+  }
 }
 export async function getPaste(db: EntityManager, id: string) {
   const [paste] = await db.query(`
@@ -62,4 +89,12 @@ export async function getPaste(db: EntityManager, id: string) {
   `, [id]);
   if (!paste) throw new NotFoundException('Paste not found');
   return paste;
+}
+async function lockPaste(db: EntityManager, id: string, authorization?: string) {
+  const [paste] = await db.query(
+    'SELECT title, language, secret_hash FROM pastes WHERE id = $1 FOR UPDATE', [id],
+  );
+  if (!paste) throw new NotFoundException('Paste not found');
+  assertOwner(paste.secret_hash, authorization);
+  return paste as { title: string; language: string };
 }
