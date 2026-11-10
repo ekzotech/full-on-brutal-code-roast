@@ -68,6 +68,14 @@ export class CommentsController {
       return comment;
     });
   }
+  @Delete('comments/:id')
+  @HttpCode(204)
+  async remove(@Param('id', ParseUUIDPipe) id: string, @Headers('authorization') authorization?: string) {
+    await this.db.transaction(async db => {
+      await lockComment(db, id, authorization);
+      await db.query('DELETE FROM comments WHERE id = $1', [id]);
+    });
+  }
 }
 async function lockComment(db: EntityManager, id: string, authorization?: string) {
   const [comment] = await db.query('SELECT secret_hash, rating FROM comments WHERE id = $1 FOR UPDATE', [id]);
