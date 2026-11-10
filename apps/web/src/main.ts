@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter, RouterLink, RouterOutlet } from '@angular/router';
+import { PastePage } from './paste-page';
 import { PasteForm } from './paste-form';
 import { Home } from './home';
 import { LanguagePage } from './language-page';
@@ -34,6 +35,8 @@ void bootstrapApplication(App, {
     { path: 'languages/:slug', component: LanguagePage },
     { path: 'pastes/new', component: PasteForm },
     { path: 'pastes/:id/edit', component: PasteForm },
+    { path: 'pastes/:id', component: PastePage },
+    { path: 'pastes/:id/revisions/:number', component: PastePage },
     { path: '**', component: NotFound },
   ])],
 });
