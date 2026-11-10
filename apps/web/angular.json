@@ -13,12 +13,10 @@
             "index": "src/index.html",
             "tsConfig": "tsconfig.json",
             "outputPath": "dist/web",
-            "assets": [
-              {
-                "glob": "*.css",
-                "input": "src",
-                "output": "/"
-              }
+            "styles": [
+              "src/styles.css",
+              "src/form.css",
+              "src/code.css"
             ]
           }
         },
