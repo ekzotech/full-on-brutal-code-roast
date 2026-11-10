@@ -2,6 +2,7 @@ import {
   Controller, Post, Body, Header, Get, Param, ParseUUIDPipe, Query, NotFoundException,
 } from '@nestjs/common';
 import { DataSource, EntityManager } from 'typeorm';
+import { pageNumber } from './pagination';
 import { CreatePaste } from './dto';
 import { getLanguage } from './languages';
 import { issueSecret } from './secrets';
@@ -26,6 +27,21 @@ export class PastesController {
       );
       return { id: id as string, secret };
     });
+  }
+
+  @Get()
+  async list(@Query('language') language?: string, @Query('page') rawPage?: string) {
+    const page = pageNumber(rawPage);
+    if (language !== undefined) await getLanguage(this.db.manager, language);
+    const rows = await this.db.query(`
+      SELECT p.id, p.title, p.created_at AS "createdAt",
+             json_build_object('slug', l.slug, 'name', l.name) AS language
+      FROM pastes p JOIN languages l ON l.slug = p.language
+      WHERE ($1::text IS NULL OR p.language = $1)
+      ORDER BY p.created_at DESC, p.id DESC
+      LIMIT 21 OFFSET $2
+    `, [language ?? null, (page - 1) * 20]);
+    return { items: rows.slice(0, 20), page, hasMore: rows.length > 20 };
   }
 
   @Get(':id')
