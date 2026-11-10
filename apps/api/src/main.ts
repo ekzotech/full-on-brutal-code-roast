@@ -5,7 +5,7 @@ import { configure } from './configure';
 import { port } from './config';
 
 async function main() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { bodyParser: false });
   configure(app);
   await app.listen(port());
 }
