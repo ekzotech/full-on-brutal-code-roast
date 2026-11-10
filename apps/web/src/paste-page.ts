@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { catchError, combineLatest, firstValueFrom, forkJoin, map, of, startWith, switchMap } from 'rxjs';
+import { catchError, firstValueFrom, forkJoin, map, of, startWith, switchMap } from 'rxjs';
 import { Api, errorText, Paste, Quality, Revision } from './api';
 import { Discussion } from './discussion';
 import { CodeView, LineRange } from './code-view';
