@@ -68,3 +68,32 @@ test.describe('mobile review', () => {
     await expect(page.getByRole('link', { name: 'Строки 1–2' })).toBeVisible();
   });
 });
+
+test('edits a paste and controls comments only in the author browser', async ({ page, browser }) => {
+  await publish(page);
+  await page.getByRole('button', { name: 'Строка 1', exact: true }).click();
+  await page.getByLabel('Комментарий', { exact: true }).fill('Original discussion');
+  await page.getByRole('button', { name: 'Добавить комментарий' }).click();
+  await expect(page.getByText('Original discussion')).toBeVisible();
+  await page.getByRole('link', { name: 'Редактировать' }).click();
+  await page.getByLabel('Код', { exact: true }).fill('const reviewed = true;');
+  await page.getByRole('button', { name: 'Сохранить изменения' }).click();
+  await expect(page.getByText('Ревизия 2', { exact: false }).first()).toBeVisible();
+  await page.getByText('История ревизий').click();
+  await page.getByRole('link', { name: 'Ревизия 1' }).click();
+  await expect(page.getByText('Original discussion')).toBeVisible();
+
+  const reader = await browser.newPage();
+  await reader.goto(page.url());
+  await expect(reader.getByText('Original discussion')).toBeVisible();
+  await expect(reader.getByRole('button', { name: 'Изменить комментарий' })).toHaveCount(0);
+  await reader.context().close();
+
+  await page.getByRole('button', { name: 'Изменить комментарий' }).click();
+  await page.getByLabel('Текст комментария').fill('Updated discussion');
+  await page.getByRole('button', { name: 'Сохранить', exact: true }).click();
+  await expect(page.getByText('Updated discussion')).toBeVisible();
+  page.once('dialog', dialog => dialog.accept());
+  await page.getByRole('button', { name: 'Удалить комментарий' }).click();
+  await expect(page.getByText('Updated discussion')).toHaveCount(0);
+});
