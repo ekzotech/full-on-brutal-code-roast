@@ -53,4 +53,25 @@ export class CommentsController {
     `, [id, number, (page - 1) * 20]);
     return { items: rows.slice(0, 20), page, hasMore: rows.length > 20 };
   }
+
+  @Patch('comments/:id')
+  update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Headers('authorization') authorization: string | undefined,
+    @Body() input: UpdateComment,
+  ) {
+    return this.db.transaction(async db => {
+      const current = await lockComment(db, id, authorization);
+      const [comment] = await db.query(`
+        UPDATE comments SET body = $2, rating = $3 WHERE id = $1 RETURNING ${fields}
+      `, [id, input.body.trim(), input.rating === undefined ? current.rating : input.rating]);
+      return comment;
+    });
+  }
+}
+async function lockComment(db: EntityManager, id: string, authorization?: string) {
+  const [comment] = await db.query('SELECT secret_hash, rating FROM comments WHERE id = $1 FOR UPDATE', [id]);
+  if (!comment) throw new NotFoundException('Comment not found');
+  assertOwner(comment.secret_hash, authorization);
+  return comment as { rating: number | null };
 }
