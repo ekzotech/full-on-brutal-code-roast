@@ -1,5 +1,5 @@
 import {
-  Controller, Post, Body, Header, Get, Param, ParseUUIDPipe, Query, NotFoundException, Patch, Headers, ConflictException, ParseIntPipe,
+  Controller, Post, Body, Header, Get, Param, ParseUUIDPipe, Query, NotFoundException, Patch, Headers, ConflictException, ParseIntPipe, Delete, HttpCode,
 } from '@nestjs/common';
 import { DataSource, EntityManager } from 'typeorm';
 import { pageNumber } from './pagination';
@@ -87,6 +87,17 @@ export class PastesController {
   @Get(':id/revisions/:number')
   revision(@Param('id', ParseUUIDPipe) id: string, @Param('number', ParseIntPipe) number: number) {
     return getRevision(this.db.manager, id, number);
+  }
+  @Delete(':id')
+  @HttpCode(204)
+  async remove(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Headers('authorization') authorization?: string,
+  ) {
+    await this.db.transaction(async db => {
+      await lockPaste(db, id, authorization);
+      await db.query('DELETE FROM pastes WHERE id = $1', [id]);
+    });
   }
 }
 export async function getPaste(db: EntityManager, id: string) {
