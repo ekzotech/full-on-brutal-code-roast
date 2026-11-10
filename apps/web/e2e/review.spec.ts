@@ -37,3 +37,16 @@ test('comments on a line selected with the mouse', async ({ page, request }) => 
   const comment = page.getByRole('listitem').filter({ hasText: 'Give this list a more specific name.' });
   await expect(comment.getByRole('link', { name: 'Строка 2' })).toBeVisible();
 });
+
+test('comments on a range selected by reverse drag', async ({ page, request }) => {
+  const { id } = await seed(request);
+  await page.goto('/pastes/' + id);
+  const line = (number: number) => page.getByRole('button', { name: 'Строка ' + number, exact: true });
+  await line(3).hover();
+  await page.mouse.down();
+  await line(1).hover();
+  await page.mouse.up();
+  await page.getByLabel('Комментарий', { exact: true }).fill('Review this block together.');
+  await page.getByRole('button', { name: 'Добавить комментарий' }).click();
+  await expect(page.getByRole('link', { name: 'Строки 1–3' })).toBeVisible();
+});
