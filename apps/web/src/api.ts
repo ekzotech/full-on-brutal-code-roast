@@ -1,23 +1,57 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 
-export interface Language { slug: string; name: string }
-export interface Quality { average: number | null; count: number }
-export interface PasteCard { id: string; title: string; language: Language; createdAt: string; quality: Quality }
-export interface Paste extends PasteCard { code: string; revision: number }
-export interface PasteInput { title: string; language: string; code: string }
-export interface Revision { number: number; createdAt: string }
-export interface CommentInput { body: string; rating: number | null }
-export interface Comment extends CommentInput {
-  id: string; startLine: number; endLine: number; createdAt: string;
+export interface Language {
+  slug: string;
+  name: string;
 }
-export interface Page<T> { items: T[]; page: number; hasMore: boolean }
+export interface Quality {
+  average: number | null;
+  count: number;
+}
+export interface PasteCard {
+  id: string;
+  title: string;
+  language: Language;
+  createdAt: string;
+  quality: Quality;
+}
+export interface Paste extends PasteCard {
+  code: string;
+  revision: number;
+}
+export interface PasteInput {
+  title: string;
+  language: string;
+  code: string;
+}
+export interface Revision {
+  number: number;
+  createdAt: string;
+}
+export interface CommentInput {
+  body: string;
+  rating: number | null;
+}
+export interface Comment extends CommentInput {
+  id: string;
+  startLine: number;
+  endLine: number;
+  createdAt: string;
+}
+export interface Page<T> {
+  items: T[];
+  page: number;
+  hasMore: boolean;
+}
 
 @Injectable({ providedIn: 'root' })
 export class Api {
   private readonly http = inject(HttpClient);
 
-  languages() { return this.http.get<Language[]>('/api/languages'); }
+  languages() {
+    return this.http.get<Language[]>('/api/languages');
+  }
 
   language(slug: string) {
     return this.http.get<Language>('/api/languages/' + encodeURIComponent(slug));
@@ -50,7 +84,11 @@ export class Api {
     return this.http.get<Page<Comment>>(discussionPath(id, revision), { params: { page } });
   }
 
-  createComment(id: string, revision: number, input: CommentInput & { startLine: number; endLine: number }) {
+  createComment(
+    id: string,
+    revision: number,
+    input: CommentInput & { startLine: number; endLine: number },
+  ) {
     return this.http.post<Comment & { secret: string }>(discussionPath(id, revision), input);
   }
 
@@ -73,7 +111,9 @@ function owner(secret: string) {
 
 export function errorText(error: unknown, fallback: string) {
   if (error instanceof HttpErrorResponse && error.status === 404) return 'Запись не найдена.';
-  if (error instanceof HttpErrorResponse && error.status === 409) return 'Появилась новая ревизия. Скопируйте изменения перед перезагрузкой.';
-  if (error instanceof HttpErrorResponse && error.status === 429) return 'Слишком много запросов. Попробуйте позже.';
+  if (error instanceof HttpErrorResponse && error.status === 409)
+    return 'Появилась новая ревизия. Скопируйте изменения перед перезагрузкой.';
+  if (error instanceof HttpErrorResponse && error.status === 429)
+    return 'Слишком много запросов. Попробуйте позже.';
   return fallback;
 }

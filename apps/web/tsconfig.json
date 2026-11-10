@@ -9,7 +9,5 @@
   "angularCompilerOptions": {
     "strictTemplates": true
   },
-  "files": [
-    "src/main.ts"
-  ]
+  "files": ["src/main.ts"]
 }

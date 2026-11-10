@@ -1,10 +1,33 @@
-.editor { display: grid; gap: .8rem; max-width: 48rem; }
-.editor label { display: grid; gap: .35rem; font-weight: 600; }
-.editor input, .editor select, .editor textarea {
-  min-width: 0; width: 100%; padding: .55rem .65rem; border: 1px solid #cbc7bf;
-  border-radius: 5px; background: #fff; color: var(--ink);
+.editor {
+  display: grid;
+  gap: 0.8rem;
+  max-width: 48rem;
 }
-.editor textarea { resize: vertical; }
-.editor > button { justify-self: start; }
-.code-input { font-family: var(--mono); }
-.error { color: #9f2f2d; }
+.editor label {
+  display: grid;
+  gap: 0.35rem;
+  font-weight: 600;
+}
+.editor input,
+.editor select,
+.editor textarea {
+  min-width: 0;
+  width: 100%;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid #cbc7bf;
+  border-radius: 5px;
+  background: #fff;
+  color: var(--ink);
+}
+.editor textarea {
+  resize: vertical;
+}
+.editor > button {
+  justify-self: start;
+}
+.code-input {
+  font-family: var(--mono);
+}
+.error {
+  color: #9f2f2d;
+}

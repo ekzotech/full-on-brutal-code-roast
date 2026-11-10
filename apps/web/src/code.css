@@ -1,14 +1,71 @@
-.code-frame { margin-block: 1rem; overflow: auto; border: 1px solid #d6d4ce; border-radius: 8px; background: #fff; }
-.code-row { display: grid; grid-template-columns: 4rem 1fr; min-width: max-content; align-items: baseline; font: .85rem/1.6 var(--mono); }
-.code-row.selected { background: var(--accent); }
-.code-row code { padding: .35rem 1rem .35rem .65rem; white-space: pre; tab-size: 4; font: inherit; }
-.line-number { position: sticky; left: 0; min-height: 36px; border: 0; border-right: 1px solid #eaeaea; background: #f7f6f3; color: var(--muted); font: inherit; text-align: right; padding: .25rem .65rem; user-select: none; }
-.line-number:hover, .selected .line-number { background: #fbf3db; color: #6b4900; }
-.line-number:focus-visible { outline-offset: -2px; }
-.hljs-keyword, .hljs-selector-tag, .hljs-literal { color: #763f87; }
-.hljs-string, .hljs-attr { color: #346538; }
-.hljs-comment { color: #666861; }
-.hljs-number, .hljs-title { color: #1f5d86; }
-.history { margin: 1rem 0; }
-.history summary { cursor: pointer; }
-@media (pointer: coarse) { .line-number { min-height: 44px; } }
+.code-frame {
+  margin-block: 1rem;
+  overflow: auto;
+  border: 1px solid #d6d4ce;
+  border-radius: 8px;
+  background: #fff;
+}
+.code-row {
+  display: grid;
+  grid-template-columns: 4rem 1fr;
+  min-width: max-content;
+  align-items: baseline;
+  font: 0.85rem/1.6 var(--mono);
+}
+.code-row.selected {
+  background: var(--accent);
+}
+.code-row code {
+  padding: 0.35rem 1rem 0.35rem 0.65rem;
+  white-space: pre;
+  tab-size: 4;
+  font: inherit;
+}
+.line-number {
+  position: sticky;
+  left: 0;
+  min-height: 36px;
+  border: 0;
+  border-right: 1px solid #eaeaea;
+  background: #f7f6f3;
+  color: var(--muted);
+  font: inherit;
+  text-align: right;
+  padding: 0.25rem 0.65rem;
+  user-select: none;
+}
+.line-number:hover,
+.selected .line-number {
+  background: #fbf3db;
+  color: #6b4900;
+}
+.line-number:focus-visible {
+  outline-offset: -2px;
+}
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-literal {
+  color: #763f87;
+}
+.hljs-string,
+.hljs-attr {
+  color: #346538;
+}
+.hljs-comment {
+  color: #666861;
+}
+.hljs-number,
+.hljs-title {
+  color: #1f5d86;
+}
+.history {
+  margin: 1rem 0;
+}
+.history summary {
+  cursor: pointer;
+}
+@media (pointer: coarse) {
+  .line-number {
+    min-height: 44px;
+  }
+}

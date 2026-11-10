@@ -7,7 +7,7 @@ export async function seed(request: APIRequestContext, language = 'typescript', 
   const title = 'Review ' + randomUUID();
   const result = await request.post('/api/pastes', { data: { title, language, code } });
   expect(result.status()).toBe(201);
-  return { ...await result.json() as { id: string; secret: string }, title };
+  return { ...((await result.json()) as { id: string; secret: string }), title };
 }
 
 export async function publish(page: Page) {

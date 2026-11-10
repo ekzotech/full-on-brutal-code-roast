@@ -11,14 +11,18 @@ import { LanguagePage } from './language-page';
   selector: 'roast-app',
   imports: [RouterLink, RouterOutlet],
   template: `
-    <header class="site-header"><div class="container bar">
-      <a routerLink="/" class="brand" aria-label="Full-on Brutal Code Roast, главная">
-        <span class="brand-mark" aria-hidden="true">/&gt;</span> Code Roast
-      </a>
-      <a class="button primary" routerLink="/pastes/new">+ Новый paste</a>
-    </div></header>
+    <header class="site-header">
+      <div class="container bar">
+        <a routerLink="/" class="brand" aria-label="Full-on Brutal Code Roast, главная">
+          <span class="brand-mark" aria-hidden="true">/&gt;</span> Code Roast
+        </a>
+        <a class="button primary" routerLink="/pastes/new">+ Новый paste</a>
+      </div>
+    </header>
     <main class="container"><router-outlet /></main>
-    <footer class="container">Full-on Brutal Code Roast <span> / </span> Анонимное код-ревью</footer>
+    <footer class="container">
+      Full-on Brutal Code Roast <span> / </span> Анонимное код-ревью
+    </footer>
   `,
 })
 class App {}
@@ -30,13 +34,16 @@ class App {}
 class NotFound {}
 
 void bootstrapApplication(App, {
-  providers: [provideHttpClient(), provideRouter([
-    { path: '', component: Home, pathMatch: 'full' },
-    { path: 'languages/:slug', component: LanguagePage },
-    { path: 'pastes/new', component: PasteForm },
-    { path: 'pastes/:id/edit', component: PasteForm },
-    { path: 'pastes/:id', component: PastePage },
-    { path: 'pastes/:id/revisions/:number', component: PastePage },
-    { path: '**', component: NotFound },
-  ])],
+  providers: [
+    provideHttpClient(),
+    provideRouter([
+      { path: '', component: Home, pathMatch: 'full' },
+      { path: 'languages/:slug', component: LanguagePage },
+      { path: 'pastes/new', component: PasteForm },
+      { path: 'pastes/:id/edit', component: PasteForm },
+      { path: 'pastes/:id', component: PastePage },
+      { path: 'pastes/:id/revisions/:number', component: PastePage },
+      { path: '**', component: NotFound },
+    ]),
+  ],
 });

@@ -1,25 +1,48 @@
 import { Component, computed, input, output, signal } from '@angular/core';
 import hljs from 'highlight.js/lib/common';
 
-export interface LineRange { startLine: number; endLine: number }
+export interface LineRange {
+  startLine: number;
+  endLine: number;
+}
 
 @Component({
   selector: 'roast-code',
   template: `
-    <p id="line-help" class="meta">Выберите номер строки. Для диапазона протяните мышью по номерам
-      или выберите две строки касанием. С клавиатуры используйте Shift и стрелки.</p>
-    <div class="code-frame" role="region" aria-label="Исходный код" aria-describedby="line-help" tabindex="0"
-      (window:pointerup)="finish()" (window:pointercancel)="finish()">
+    <p id="line-help" class="meta">
+      Выберите номер строки. Для диапазона протяните мышью по номерам или выберите две строки
+      касанием. С клавиатуры используйте Shift и стрелки.
+    </p>
+    <div
+      class="code-frame"
+      role="region"
+      aria-label="Исходный код"
+      aria-describedby="line-help"
+      tabindex="0"
+      (window:pointerup)="finish()"
+      (window:pointercancel)="finish()"
+    >
       @for (line of lines(); track $index) {
         @let number = $index + 1;
         <div class="code-row" [class.selected]="contains(number)" [id]="'line-' + number">
-          <button type="button" class="line-number" [attr.aria-label]="'Строка ' + number"
-            [attr.aria-pressed]="contains(number)" (pointerdown)="start(number, $event)"
-            (pointerenter)="extend(number)" (click)="activate(number, $event)"
+          <button
+            type="button"
+            class="line-number"
+            [attr.aria-label]="'Строка ' + number"
+            [attr.aria-pressed]="contains(number)"
+            (pointerdown)="start(number, $event)"
+            (pointerenter)="extend(number)"
+            (click)="activate(number, $event)"
             (keydown.shift.arrowup)="step(number, -1, $event)"
-            (keydown.shift.arrowdown)="step(number, 1, $event)">{{ number }}</button>
-          @if (line.html !== undefined) { <code [innerHTML]="line.html"></code> }
-          @else { <code>{{ line.text }}</code> }
+            (keydown.shift.arrowdown)="step(number, 1, $event)"
+          >
+            {{ number }}
+          </button>
+          @if (line.html !== undefined) {
+            <code [innerHTML]="line.html"></code>
+          } @else {
+            <code>{{ line.text }}</code>
+          }
         </div>
       }
     </div>
@@ -43,10 +66,15 @@ export class CodeView {
   readonly lines = computed(() => {
     const language = this.language();
     const supported = hljs.getLanguage(language);
-    return this.code().split(/\r\n|\r|\n/u).map(text => ({
-      text,
-      html: supported && text ? hljs.highlight(text, { language, ignoreIllegals: true }).value : undefined,
-    }));
+    return this.code()
+      .split(/\r\n|\r|\n/u)
+      .map((text) => ({
+        text,
+        html:
+          supported && text
+            ? hljs.highlight(text, { language, ignoreIllegals: true }).value
+            : undefined,
+      }));
   });
 
   contains(number: number) {
@@ -71,7 +99,9 @@ export class CodeView {
     if (this.drag !== null) this.select(this.drag, number);
   }
 
-  finish() { this.drag = null; }
+  finish() {
+    this.drag = null;
+  }
 
   activate(number: number, event: MouseEvent) {
     if (event.detail === 0) {

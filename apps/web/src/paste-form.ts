@@ -16,7 +16,8 @@ import { readSecret, saveSecret } from './ownership';
     } @else if (ready()) {
       <form class="panel editor" (ngSubmit)="save()">
         <label>Заголовок <input name="title" [(ngModel)]="title" maxlength="120" required /></label>
-        <label>Язык
+        <label
+          >Язык
           <select name="language" [(ngModel)]="language" required>
             <option value="" disabled>Выберите язык</option>
             @for (option of languages(); track option.slug) {
@@ -24,19 +25,40 @@ import { readSecret, saveSecret } from './ownership';
             }
           </select>
         </label>
-        <label>Код <textarea class="code-input" name="code" rows="12" [(ngModel)]="code"
-          spellcheck="false" required aria-describedby="code-size"></textarea></label>
-        <span id="code-size" class="meta" [class.error]="bytes > limit">{{ bytes }} / {{ limit }} байт</span>
-        @if (bytes > limit) { <p role="alert">Код превышает лимит.</p> }
+        <label
+          >Код
+          <textarea
+            class="code-input"
+            name="code"
+            rows="12"
+            [(ngModel)]="code"
+            spellcheck="false"
+            required
+            aria-describedby="code-size"
+          ></textarea>
+        </label>
+        <span id="code-size" class="meta" [class.error]="bytes > limit"
+          >{{ bytes }} / {{ limit }} байт</span
+        >
+        @if (bytes > limit) {
+          <p role="alert">Код превышает лимит.</p>
+        }
         <p class="meta">Право на редактирование сохраняется в этом браузере.</p>
-        <button class="button primary" type="submit"
-          [disabled]="saving() || !title.trim() || !language || !code.trim() || bytes > limit">
+        <button
+          class="button primary"
+          type="submit"
+          [disabled]="saving() || !title.trim() || !language || !code.trim() || bytes > limit"
+        >
           {{ id ? 'Сохранить изменения' : 'Опубликовать' }}
         </button>
       </form>
     }
-    @if (error()) { <p class="error" role="alert">{{ error() }}</p> }
-    @if (published()) { <a [routerLink]="['/pastes', published()]">Открыть публикацию</a> }
+    @if (error()) {
+      <p class="error" role="alert">{{ error() }}</p>
+    }
+    @if (published()) {
+      <a [routerLink]="['/pastes', published()]">Открыть публикацию</a>
+    }
   `,
 })
 export class PasteForm {
@@ -57,9 +79,13 @@ export class PasteForm {
   code = '';
   private revision = 0;
 
-  get bytes() { return new TextEncoder().encode(this.code).length; }
+  get bytes() {
+    return new TextEncoder().encode(this.code).length;
+  }
 
-  constructor() { void this.load(); }
+  constructor() {
+    void this.load();
+  }
 
   private async load() {
     try {
@@ -70,7 +96,7 @@ export class PasteForm {
       const languages = await firstValueFrom(this.api.languages());
       this.languages.set(languages);
       const preferred = this.route.snapshot.queryParamMap.get('language');
-      if (languages.some(option => option.slug === preferred)) this.language = preferred!;
+      if (languages.some((option) => option.slug === preferred)) this.language = preferred!;
       if (this.id) {
         const paste = await firstValueFrom(this.api.paste(this.id));
         this.title = paste.title;
@@ -87,13 +113,23 @@ export class PasteForm {
   }
 
   async save() {
-    if (this.saving() || !this.ready() || !this.title.trim() || !this.language || !this.code.trim() || this.bytes > this.limit) return;
+    if (
+      this.saving() ||
+      !this.ready() ||
+      !this.title.trim() ||
+      !this.language ||
+      !this.code.trim() ||
+      this.bytes > this.limit
+    )
+      return;
     this.saving.set(true);
     this.error.set('');
     const input = { title: this.title, language: this.language, code: this.code };
     try {
       if (this.id && this.secret) {
-        await firstValueFrom(this.api.updatePaste(this.id, { ...input, expectedRevision: this.revision }, this.secret));
+        await firstValueFrom(
+          this.api.updatePaste(this.id, { ...input, expectedRevision: this.revision }, this.secret),
+        );
         await this.router.navigate(['/pastes', this.id]);
       } else {
         const result = await firstValueFrom(this.api.createPaste(input));
@@ -106,7 +142,9 @@ export class PasteForm {
         await this.router.navigate(['/pastes', result.id]);
       }
     } catch (error) {
-      this.error.set(errorText(error, 'Не удалось сохранить публикацию. Введённый код остался в форме.'));
+      this.error.set(
+        errorText(error, 'Не удалось сохранить публикацию. Введённый код остался в форме.'),
+      );
     } finally {
       this.saving.set(false);
     }

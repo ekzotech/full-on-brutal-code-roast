@@ -10,11 +10,19 @@ import { Api } from './api';
     <section class="hero">
       <p class="eyebrow">Публичная доска код-ревью</p>
       <h1>Full-on Brutal<br />Code Roast.</h1>
-      <p class="lede">Выложите фрагмент кода анонимно. Получите разбор по строкам и оценки от других разработчиков.</p>
-      <a class="button primary" routerLink="/pastes/new">Опубликовать код <span aria-hidden="true">↗</span></a>
+      <p class="lede">
+        Выложите фрагмент кода анонимно. Получите разбор по строкам и оценки от других
+        разработчиков.
+      </p>
+      <a class="button primary" routerLink="/pastes/new"
+        >Опубликовать код <span aria-hidden="true">↗</span></a
+      >
     </section>
     <section aria-labelledby="languages">
-      <div class="section-heading"><h2 id="languages">Языки</h2><span class="eyebrow">Каталог</span></div>
+      <div class="section-heading">
+        <h2 id="languages">Языки</h2>
+        <span class="eyebrow">Каталог</span>
+      </div>
       @if (languages() === undefined) {
         <p role="status">Загружаем языки…</p>
       } @else if (languages() === null) {
@@ -23,14 +31,21 @@ import { Api } from './api';
         <div class="language-grid">
           @for (language of languages(); track language.slug) {
             <a class="language-card" [routerLink]="['/languages', language.slug]">
-              <strong>{{ language.name }}</strong><span aria-hidden="true">↗</span>
+              <strong>{{ language.name }}</strong
+              ><span aria-hidden="true">↗</span>
             </a>
-          } @empty { <p>Языков пока нет.</p> }
+          } @empty {
+            <p>Языков пока нет.</p>
+          }
         </div>
       }
     </section>
   `,
 })
 export class Home {
-  readonly languages = toSignal(inject(Api).languages().pipe(catchError(() => of(null))));
+  readonly languages = toSignal(
+    inject(Api)
+      .languages()
+      .pipe(catchError(() => of(null))),
+  );
 }

@@ -25,5 +25,8 @@ class HealthController {
   }
 }
 
-@Module({ imports: [DatabaseModule], controllers: [HealthController, LanguagesController, PastesController, CommentsController] })
+@Module({
+  imports: [DatabaseModule],
+  controllers: [HealthController, LanguagesController, PastesController, CommentsController],
+})
 export class AppModule {}

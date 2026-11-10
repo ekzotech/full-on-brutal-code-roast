@@ -5,7 +5,10 @@ import helmet from 'helmet';
 
 export function configure(app: INestApplication) {
   const writes = rateLimit({
-    windowMs: 60000, limit: 60, standardHeaders: 'draft-8', legacyHeaders: false,
+    windowMs: 60000,
+    limit: 60,
+    standardHeaders: 'draft-8',
+    legacyHeaders: false,
   });
   const limitWrites: RequestHandler = (request, response, next) => {
     if (['POST', 'PATCH', 'DELETE'].includes(request.method)) writes(request, response, next);

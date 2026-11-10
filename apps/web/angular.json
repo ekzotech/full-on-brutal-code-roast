@@ -13,11 +13,7 @@
             "index": "src/index.html",
             "tsConfig": "tsconfig.json",
             "outputPath": "dist/web",
-            "styles": [
-              "src/styles.css",
-              "src/form.css",
-              "src/code.css"
-            ]
+            "styles": ["src/styles.css", "src/form.css", "src/code.css"]
           }
         },
         "serve": {

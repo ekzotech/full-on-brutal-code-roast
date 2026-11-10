@@ -29,19 +29,24 @@ test('comments on a line selected with the mouse', async ({ page, request }) => 
   const { id } = await seed(request);
   await page.goto('/pastes/' + id);
   await page.getByRole('button', { name: 'Строка 2', exact: true }).click();
-  await page.getByLabel('Комментарий', { exact: true }).fill('Give this list a more specific name.');
+  await page
+    .getByLabel('Комментарий', { exact: true })
+    .fill('Give this list a more specific name.');
   await page.getByLabel('Оценка качества').selectOption({ label: '4' });
   await page.getByRole('button', { name: 'Добавить комментарий' }).click();
   await expect(page.getByText('Качество 4 / 5')).toBeVisible();
   await page.reload();
-  const comment = page.getByRole('listitem').filter({ hasText: 'Give this list a more specific name.' });
+  const comment = page
+    .getByRole('listitem')
+    .filter({ hasText: 'Give this list a more specific name.' });
   await expect(comment.getByRole('link', { name: 'Строка 2' })).toBeVisible();
 });
 
 test('comments on a range selected by reverse drag', async ({ page, request }) => {
   const { id } = await seed(request);
   await page.goto('/pastes/' + id);
-  const line = (number: number) => page.getByRole('button', { name: 'Строка ' + number, exact: true });
+  const line = (number: number) =>
+    page.getByRole('button', { name: 'Строка ' + number, exact: true });
   await line(3).hover();
   await page.mouse.down();
   await line(1).hover();
@@ -59,8 +64,10 @@ test.describe('mobile review', () => {
     await page.goto('/pastes/' + id);
     const frame = page.getByRole('region', { name: 'Исходный код' });
     await expect(frame).toBeVisible();
-    expect(await frame.evaluate(node => node.scrollWidth > node.clientWidth)).toBe(true);
-    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(412);
+    expect(await frame.evaluate((node) => node.scrollWidth > node.clientWidth)).toBe(true);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+      412,
+    );
     await page.getByRole('button', { name: 'Строка 1', exact: true }).tap();
     await page.getByRole('button', { name: 'Строка 2', exact: true }).tap();
     await page.getByLabel('Комментарий', { exact: true }).fill('Checked on a phone.');
@@ -69,7 +76,10 @@ test.describe('mobile review', () => {
   });
 });
 
-test('edits a paste and controls comments only in the author browser', async ({ page, browser }) => {
+test('edits a paste and controls comments only in the author browser', async ({
+  page,
+  browser,
+}) => {
   await publish(page);
   await page.getByRole('button', { name: 'Строка 1', exact: true }).click();
   await page.getByLabel('Комментарий', { exact: true }).fill('Original discussion');
@@ -93,7 +103,7 @@ test('edits a paste and controls comments only in the author browser', async ({ 
   await page.getByLabel('Текст комментария').fill('Updated discussion');
   await page.getByRole('button', { name: 'Сохранить', exact: true }).click();
   await expect(page.getByText('Updated discussion')).toBeVisible();
-  page.once('dialog', dialog => dialog.accept());
+  page.once('dialog', (dialog) => dialog.accept());
   await page.getByRole('button', { name: 'Удалить комментарий' }).click();
   await expect(page.getByText('Updated discussion')).toHaveCount(0);
 });
