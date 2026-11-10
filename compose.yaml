@@ -1,0 +1,19 @@
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: roast
+      POSTGRES_PASSWORD: roast
+      POSTGRES_DB: roast
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U roast -d roast"]
+      interval: 3s
+      timeout: 3s
+      retries: 15
+
+volumes:
+  postgres:
