@@ -24,3 +24,16 @@ test('blocks empty and oversized code', async ({ page }) => {
   await expect(page.getByText('Код превышает лимит.')).toBeVisible();
   await expect(submit).toBeDisabled();
 });
+
+test('comments on a line selected with the mouse', async ({ page, request }) => {
+  const { id } = await seed(request);
+  await page.goto('/pastes/' + id);
+  await page.getByRole('button', { name: 'Строка 2', exact: true }).click();
+  await page.getByLabel('Комментарий', { exact: true }).fill('Give this list a more specific name.');
+  await page.getByLabel('Оценка качества').selectOption({ label: '4' });
+  await page.getByRole('button', { name: 'Добавить комментарий' }).click();
+  await expect(page.getByText('Качество 4 / 5')).toBeVisible();
+  await page.reload();
+  const comment = page.getByRole('listitem').filter({ hasText: 'Give this list a more specific name.' });
+  await expect(comment.getByRole('link', { name: 'Строка 2' })).toBeVisible();
+});
