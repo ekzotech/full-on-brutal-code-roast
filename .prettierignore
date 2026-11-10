@@ -1,0 +1,5 @@
+package-lock.json
+**/dist
+**/.angular
+**/test-results
+**/playwright-report
