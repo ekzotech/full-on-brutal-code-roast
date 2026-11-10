@@ -2,7 +2,8 @@ import { Component, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { catchError, combineLatest, firstValueFrom, forkJoin, map, of, startWith, switchMap } from 'rxjs';
-import { Api, errorText, Paste, Revision } from './api';
+import { Api, errorText, Paste, Quality, Revision } from './api';
+import { Discussion } from './discussion';
 import { CodeView, LineRange } from './code-view';
 import { clearSecret, readSecret } from './ownership';
 
@@ -10,7 +11,7 @@ type State = { kind: 'loading' } | { kind: 'error'; text: string } |
   { kind: 'ready'; paste: Paste; revisions: Revision[]; historical: boolean };
 
 @Component({
-  imports: [RouterLink, CodeView],
+  imports: [RouterLink, CodeView, Discussion],
   template: `
     @let view = state();
     @if (view.kind === 'loading') {
@@ -22,8 +23,9 @@ type State = { kind: 'loading' } | { kind: 'error'; text: string } |
       <a class="back" [routerLink]="['/languages', paste.language.slug]">← {{ paste.language.name }}</a>
       <p class="eyebrow">{{ paste.language.name }} / Ревизия {{ paste.revision }}</p>
       <h1>{{ paste.title }}</h1>
-      <p class="meta">
-        @if (paste.quality.count) { Качество {{ paste.quality.average }} / 5 · Оценок {{ paste.quality.count }} }
+      @let quality = refreshedQuality() ?? paste.quality;
+      <p class="meta" aria-live="polite">
+        @if (quality.count) { Качество {{ quality.average }} / 5 · Оценок {{ quality.count }} }
         @else { Оценок пока нет }
       </p>
       <div class="actions">
@@ -48,6 +50,7 @@ type State = { kind: 'loading' } | { kind: 'error'; text: string } |
       }
       @if (error()) { <p class="error" role="alert">{{ error() }}</p> }
       <roast-code [code]="paste.code" [language]="paste.language.slug" (changed)="range.set($event)" />
+      <roast-discussion [paste]="paste" [range]="range()" (qualityChanged)="refreshedQuality.set($event)" />
     }
   `,
 })
@@ -57,10 +60,12 @@ export class PastePage {
   private readonly router = inject(Router);
   readonly deleting = signal(false);
   readonly error = signal('');
+  readonly refreshedQuality = signal<Quality | null>(null);
   readonly range = signal<LineRange | null>(null);
 
   readonly state = toSignal(this.route.paramMap.pipe(
     switchMap(params => {
+      this.refreshedQuality.set(null);
       this.range.set(null);
       this.error.set('');
       const id = params.get('id')!;

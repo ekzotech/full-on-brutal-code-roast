@@ -7,6 +7,10 @@ export interface PasteCard { id: string; title: string; language: Language; crea
 export interface Paste extends PasteCard { code: string; revision: number }
 export interface PasteInput { title: string; language: string; code: string }
 export interface Revision { number: number; createdAt: string }
+export interface CommentInput { body: string; rating: number | null }
+export interface Comment extends CommentInput {
+  id: string; startLine: number; endLine: number; createdAt: string;
+}
 export interface Page<T> { items: T[]; page: number; hasMore: boolean }
 
 @Injectable({ providedIn: 'root' })
@@ -42,6 +46,25 @@ export class Api {
   deletePaste(id: string, secret: string) {
     return this.http.delete<void>('/api/pastes/' + id, owner(secret));
   }
+  comments(id: string, revision: number, page: number) {
+    return this.http.get<Page<Comment>>(discussionPath(id, revision), { params: { page } });
+  }
+
+  createComment(id: string, revision: number, input: CommentInput & { startLine: number; endLine: number }) {
+    return this.http.post<Comment & { secret: string }>(discussionPath(id, revision), input);
+  }
+
+  updateComment(id: string, input: CommentInput, secret: string) {
+    return this.http.patch<Comment>('/api/comments/' + id, input, owner(secret));
+  }
+
+  deleteComment(id: string, secret: string) {
+    return this.http.delete<void>('/api/comments/' + id, owner(secret));
+  }
+}
+
+function discussionPath(id: string, revision: number) {
+  return '/api/pastes/' + id + '/revisions/' + revision + '/comments';
 }
 
 function owner(secret: string) {
