@@ -41,3 +41,21 @@ jobs:
         with:
           name: playwright-results
           path: apps/web/test-results/
+
+  production-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: docker compose -f compose.yaml -f compose.app.yaml up --build -d --wait
+      - run: npx playwright test --config apps/web/playwright.smoke.config.ts
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: production-smoke-results
+          path: apps/web/test-results/
