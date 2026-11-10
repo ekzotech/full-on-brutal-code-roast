@@ -103,12 +103,17 @@ export class PastesController {
 export async function getPaste(db: EntityManager, id: string) {
   const [paste] = await db.query(`
     SELECT p.id, p.title, p.created_at AS "createdAt", r.number AS revision, r.code,
+           json_build_object('average', rating.average, 'count', rating.count) AS quality,
            json_build_object('slug', l.slug, 'name', l.name) AS language
     FROM pastes p
     JOIN LATERAL (
       SELECT number, code FROM revisions WHERE paste_id = p.id ORDER BY number DESC LIMIT 1
     ) r ON true
     JOIN languages l ON l.slug = p.language
+    LEFT JOIN LATERAL (
+      SELECT ROUND(AVG(rating), 2)::float8 AS average, COUNT(rating)::int AS count
+      FROM comments WHERE paste_id = p.id AND revision = r.number AND rating IS NOT NULL
+    ) rating ON true
     WHERE p.id = $1
   `, [id]);
   if (!paste) throw new NotFoundException('Paste not found');
@@ -126,9 +131,14 @@ export async function getRevision(db: EntityManager, id: string, number: number)
   if (number < 1 || number > 2147483647) throw new NotFoundException('Revision not found');
   const [revision] = await db.query(`
     SELECT p.id, p.title, p.created_at AS "createdAt", r.number AS revision, r.code,
+           json_build_object('average', rating.average, 'count', rating.count) AS quality,
            json_build_object('slug', l.slug, 'name', l.name) AS language
     FROM revisions r JOIN pastes p ON p.id = r.paste_id
     JOIN languages l ON l.slug = r.language
+    LEFT JOIN LATERAL (
+      SELECT ROUND(AVG(rating), 2)::float8 AS average, COUNT(rating)::int AS count
+      FROM comments WHERE paste_id = r.paste_id AND revision = r.number AND rating IS NOT NULL
+    ) rating ON true
     WHERE r.paste_id = $1 AND r.number = $2
   `, [id, number]);
   if (!revision) throw new NotFoundException('Revision not found');
