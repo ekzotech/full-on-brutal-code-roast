@@ -18,7 +18,7 @@ export default defineConfig({
       timeout: 60000,
     },
     {
-      command: 'npm run dev:web',
+      command: 'npm run dev -w @roast/web -- --host 127.0.0.1',
       cwd: '../..',
       url: 'http://127.0.0.1:4200',
       timeout: 90000,
