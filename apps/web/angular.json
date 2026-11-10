@@ -12,7 +12,14 @@
             "browser": "src/main.ts",
             "index": "src/index.html",
             "tsConfig": "tsconfig.json",
-            "outputPath": "dist/web"
+            "outputPath": "dist/web",
+            "assets": [
+              {
+                "glob": "styles.css",
+                "input": "src",
+                "output": "/"
+              }
+            ]
           }
         },
         "serve": {
