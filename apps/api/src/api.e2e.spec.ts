@@ -55,4 +55,14 @@ suite('PostgreSQL API', () => {
     expect(response.body).not.toHaveProperty('secret');
     expect(response.body).not.toHaveProperty('secret_hash');
   });
+
+  it.each(['', ' \n', 'я'.repeat(25601)])('returns 400 for invalid code case %#', async code => {
+    await http().post('/api/pastes').send({ ...input, code }).expect(400);
+    const [result] = await db.query('SELECT count(*)::int AS count FROM pastes');
+    expect(result.count).toBe(0);
+  });
+
+  it('accepts exactly 51,200 bytes even when JSON escaping expands the body', async () => {
+    await http().post('/api/pastes').send({ ...input, code: '\u0001'.repeat(51200) }).expect(201);
+  });
 });
