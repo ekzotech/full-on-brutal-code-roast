@@ -1,0 +1,21 @@
+{
+  "name": "full-on-brutal-code-roast",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "dev:api": "npm run dev -w @roast/api",
+    "dev:web": "npm run dev -w @roast/web",
+    "test": "npm run test -w @roast/api"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3",
+    "prettier": "^3.6.0"
+  }
+}
