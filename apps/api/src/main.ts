@@ -1,11 +1,12 @@
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app';
+import { configure } from './configure';
 import { port } from './config';
 
 async function main() {
   const app = await NestFactory.create(AppModule);
-  app.setGlobalPrefix('api');
+  configure(app);
   await app.listen(port());
 }
 
