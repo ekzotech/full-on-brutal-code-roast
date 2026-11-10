@@ -1,5 +1,5 @@
 import {
-  Controller, Post, Body, Header, Get, Param, ParseUUIDPipe, Query, NotFoundException, Patch, Headers, ConflictException,
+  Controller, Post, Body, Header, Get, Param, ParseUUIDPipe, Query, NotFoundException, Patch, Headers, ConflictException, ParseIntPipe,
 } from '@nestjs/common';
 import { DataSource, EntityManager } from 'typeorm';
 import { pageNumber } from './pagination';
@@ -84,6 +84,10 @@ export class PastesController {
     if (!rows.length) throw new NotFoundException('Paste not found');
     return rows;
   }
+  @Get(':id/revisions/:number')
+  revision(@Param('id', ParseUUIDPipe) id: string, @Param('number', ParseIntPipe) number: number) {
+    return getRevision(this.db.manager, id, number);
+  }
 }
 export async function getPaste(db: EntityManager, id: string) {
   const [paste] = await db.query(`
@@ -106,4 +110,16 @@ async function lockPaste(db: EntityManager, id: string, authorization?: string) 
   if (!paste) throw new NotFoundException('Paste not found');
   assertOwner(paste.secret_hash, authorization);
   return paste as { title: string; language: string };
+}
+export async function getRevision(db: EntityManager, id: string, number: number) {
+  if (number < 1 || number > 2147483647) throw new NotFoundException('Revision not found');
+  const [revision] = await db.query(`
+    SELECT p.id, p.title, p.created_at AS "createdAt", r.number AS revision, r.code,
+           json_build_object('slug', l.slug, 'name', l.name) AS language
+    FROM revisions r JOIN pastes p ON p.id = r.paste_id
+    JOIN languages l ON l.slug = r.language
+    WHERE r.paste_id = $1 AND r.number = $2
+  `, [id, number]);
+  if (!revision) throw new NotFoundException('Revision not found');
+  return revision;
 }
