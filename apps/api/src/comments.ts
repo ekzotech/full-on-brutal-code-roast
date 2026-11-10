@@ -38,4 +38,19 @@ export class CommentsController {
       return { ...comment, secret };
     });
   }
+
+  @Get(discussion)
+  async list(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('number', ParseIntPipe) number: number,
+    @Query('page') rawPage?: string,
+  ) {
+    const page = pageNumber(rawPage);
+    await getRevision(this.db.manager, id, number);
+    const rows = await this.db.query(`
+      SELECT ${fields} FROM comments WHERE paste_id = $1 AND revision = $2
+      ORDER BY start_line, end_line, created_at, id LIMIT 21 OFFSET $3
+    `, [id, number, (page - 1) * 20]);
+    return { items: rows.slice(0, 20), page, hasMore: rows.length > 20 };
+  }
 }
