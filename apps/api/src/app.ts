@@ -1,4 +1,5 @@
 import { Controller, Get, Module } from '@nestjs/common';
+import { CommentsController } from './comments';
 import { DatabaseModule } from './database';
 import { LanguagesController } from './languages';
 import { PastesController } from './pastes';
@@ -11,5 +12,5 @@ class HealthController {
   }
 }
 
-@Module({ imports: [DatabaseModule], controllers: [HealthController, LanguagesController, PastesController] })
+@Module({ imports: [DatabaseModule], controllers: [HealthController, LanguagesController, PastesController, CommentsController] })
 export class AppModule {}
