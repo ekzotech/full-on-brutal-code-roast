@@ -1,0 +1,24 @@
+{
+  "name": "@roast/web",
+  "private": true,
+  "scripts": {
+    "build": "ng build",
+    "dev": "ng serve --proxy-config proxy.json"
+  },
+  "dependencies": {
+    "@angular/core": "^21.2.0",
+    "@angular/common": "^21.2.0",
+    "@angular/compiler": "^21.2.0",
+    "@angular/forms": "^21.2.0",
+    "@angular/router": "^21.2.0",
+    "@angular/platform-browser": "^21.2.0",
+    "rxjs": "^7.8.2",
+    "highlight.js": "^11.11.1"
+  },
+  "devDependencies": {
+    "@angular/build": "^21.2.0",
+    "@angular/cli": "^21.2.0",
+    "@angular/compiler-cli": "^21.2.0",
+    "@playwright/test": "^1.56.0"
+  }
+}
