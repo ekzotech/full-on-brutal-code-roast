@@ -35,8 +35,13 @@ export class PastesController {
     if (language !== undefined) await getLanguage(this.db.manager, language);
     const rows = await this.db.query(`
       SELECT p.id, p.title, p.created_at AS "createdAt",
+             json_build_object('average', rating.average, 'count', rating.count) AS quality,
              json_build_object('slug', l.slug, 'name', l.name) AS language
       FROM pastes p JOIN languages l ON l.slug = p.language
+      LEFT JOIN LATERAL (
+      SELECT ROUND(AVG(rating), 2)::float8 AS average, COUNT(rating)::int AS count
+      FROM comments WHERE paste_id = p.id AND revision = (SELECT MAX(number) FROM revisions WHERE paste_id = p.id) AND rating IS NOT NULL
+    ) rating ON true
       WHERE ($1::text IS NULL OR p.language = $1)
       ORDER BY p.created_at DESC, p.id DESC
       LIMIT 21 OFFSET $2
