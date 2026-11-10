@@ -75,6 +75,15 @@ export class PastesController {
       return getPaste(db, id);
     });
   }
+  @Get(':id/revisions')
+  async revisions(@Param('id', ParseUUIDPipe) id: string) {
+    const rows = await this.db.query(
+      'SELECT number, created_at AS "createdAt" FROM revisions WHERE paste_id = $1 ORDER BY number DESC',
+      [id],
+    );
+    if (!rows.length) throw new NotFoundException('Paste not found');
+    return rows;
+  }
 }
 export async function getPaste(db: EntityManager, id: string) {
   const [paste] = await db.query(`
