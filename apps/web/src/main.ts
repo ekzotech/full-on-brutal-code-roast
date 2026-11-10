@@ -3,6 +3,7 @@ import { bootstrapApplication } from '@angular/platform-browser';
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter, RouterLink, RouterOutlet } from '@angular/router';
 import { Home } from './home';
+import { LanguagePage } from './language-page';
 
 @Component({
   selector: 'roast-app',
@@ -29,6 +30,7 @@ class NotFound {}
 void bootstrapApplication(App, {
   providers: [provideHttpClient(), provideRouter([
     { path: '', component: Home, pathMatch: 'full' },
+    { path: 'languages/:slug', component: LanguagePage },
     { path: '**', component: NotFound },
   ])],
 });
