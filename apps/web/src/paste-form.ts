@@ -78,6 +78,7 @@ export class PasteForm {
   language = '';
   code = '';
   private revision = 0;
+  private originalCode = '';
 
   get bytes() {
     return new TextEncoder().encode(this.code).length;
@@ -101,7 +102,7 @@ export class PasteForm {
         const paste = await firstValueFrom(this.api.paste(this.id));
         this.title = paste.title;
         this.language = paste.language.slug;
-        this.code = paste.code;
+        this.originalCode = this.code = paste.code.replace(/\r\n?/g, '\n');
         this.revision = paste.revision;
       }
       this.ready.set(true);
@@ -128,7 +129,15 @@ export class PasteForm {
     try {
       if (this.id && this.secret) {
         await firstValueFrom(
-          this.api.updatePaste(this.id, { ...input, expectedRevision: this.revision }, this.secret),
+          this.api.updatePaste(
+            this.id,
+            {
+              ...input,
+              code: this.code === this.originalCode ? undefined : this.code,
+              expectedRevision: this.revision,
+            },
+            this.secret,
+          ),
         );
         await this.router.navigate(['/pastes', this.id]);
       } else {

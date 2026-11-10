@@ -73,7 +73,11 @@ export class Api {
     return this.http.post<{ id: string; secret: string }>('/api/pastes', input);
   }
 
-  updatePaste(id: string, input: PasteInput & { expectedRevision: number }, secret: string) {
+  updatePaste(
+    id: string,
+    input: Partial<PasteInput> & { expectedRevision: number },
+    secret: string,
+  ) {
     return this.http.patch<Paste>('/api/pastes/' + id, input, owner(secret));
   }
 
