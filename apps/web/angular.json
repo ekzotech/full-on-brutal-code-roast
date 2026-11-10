@@ -15,7 +15,7 @@
             "outputPath": "dist/web",
             "assets": [
               {
-                "glob": "styles.css",
+                "glob": "*.css",
                 "input": "src",
                 "output": "/"
               }
