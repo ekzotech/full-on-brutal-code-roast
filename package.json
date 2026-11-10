@@ -12,10 +12,16 @@
     "build": "npm run build --workspaces",
     "dev:api": "npm run dev -w @roast/api",
     "dev:web": "npm run dev -w @roast/web",
-    "test": "npm run test -w @roast/api"
+    "test": "npm run test -w @roast/api",
+    "migrate": "node apps/api/dist/migrate.js",
+    "migrate:revert": "node apps/api/dist/migrate.js revert",
+    "test:browser": "playwright test --config apps/web/playwright.config.ts",
+    "lint": "eslint apps"
   },
   "devDependencies": {
+    "eslint": "^9.39.5",
+    "prettier": "^3.6.0",
     "typescript": "~5.9.3",
-    "prettier": "^3.6.0"
+    "typescript-eslint": "^8.72.2"
   }
 }
